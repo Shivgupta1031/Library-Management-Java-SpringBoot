@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System - Add/Edit Member</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .header .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+
+        .breadcrumb {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 15px 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            animation: slideDown 0.6s ease-out 0.1s both;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .breadcrumb a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .breadcrumb a:hover {
+            color: #764ba2;
+            text-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .breadcrumb .separator {
+            margin: 0 10px;
+            color: #999;
+        }
+
+        .breadcrumb .current {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            animation: slideUp 0.6s ease-out 0.2s both;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 20px 20px 0 0;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .form-header h2 {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .form-header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-label i {
+            color: #667eea;
+            width: 16px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+            background: white;
+        }
+
+        .form-input:hover {
+            border-color: #b8c5f2;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 5px;
+        }
+
+        .checkbox-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .checkbox-input {
+            opacity: 0;
+            position: absolute;
+            width: 0;
+            height: 0;
+        }
+
+        .checkbox-custom {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .checkbox-input:checked + .checkbox-custom {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+            transform: scale(1.1);
+        }
+
+        .checkbox-custom::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: white;
+            font-size: 12px;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-input:checked + .checkbox-custom::after {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .checkbox-label {
+            color: #333;
+            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+            min-width: 140px;
+            justify-content: center;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+            box-shadow: 0 10px 25px rgba(245, 87, 108, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+            border: 2px solid #667eea;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .circle-1 {
+            width: 80px;
+            height: 80px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .circle-2 {
+            width: 120px;
+            height: 120px;
+            top: 60%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+
+        .circle-3 {
+            width: 60px;
+            height: 60px;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #667eea;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus + .input-icon {
+            color: #764ba2;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            opacity: 0;
+            animation: slideIn 0.3s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .form-container {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .breadcrumb {
+                font-size: 0.9rem;
+            }
+        }
+
+        .form-step {
+            opacity: 0;
+            animation: stepIn 0.5s ease-out forwards;
+        }
+
+        @keyframes stepIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-elements">
+        <div class="floating-circle circle-1"></div>
+        <div class="floating-circle circle-2"></div>
+        <div class="floating-circle circle-3"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-book-open"></i> Library Management System</h1>
+            <p class="subtitle">Manage your library members with ease and efficiency</p>
+        </div>
+
+        <div class="breadcrumb">
+            <a href="/members"><i class="fas fa-users"></i> Members</a>
+            <span class="separator"><i class="fas fa-chevron-right"></i></span>
+            <span class="current" th:text="${member.id != 0 ? 'Edit Member' : 'Add New Member'}">Add New Member</span>
+        </div>
+
+        <div class="form-container">
+            <div class="form-header">
+                <h2 th:text="${member.id != 0 ? 'Edit Member' : 'Add New Member'}">Add New Member</h2>
+                <p th:text="${member.id != 0 ? 'Update member information below' : 'Fill in the details to add a new member to the library'}">Fill in the details to add a new member to the library</p>
+            </div>
+
+            <!-- Success Message (if any) -->
+            <div class="success-message" th:if="${successMessage}">
+                <i class="fas fa-check-circle"></i>
+                <span th:text="${successMessage}">Member saved successfully!</span>
+            </div>
+
+            <form th:action="@{${member.id == 0} ? '/member' : '/update/' + ${member.id}}" th:object="${member}" method="post">
+                <!-- Hidden ID field for edit mode -->
+                <input type="hidden" th:field="*{id}" th:if="${member.id != 0}">
+
+                <div class="form-step" style="animation-delay: 0.1s;">
+                    <div class="form-group">
+                        <label for="name" class="form-label">
+                            <i class="fas fa-user"></i>
+                            Full Name
+                            <span class="tooltip" data-tooltip="Enter the member's complete full name">
+                                <i class="fas fa-info-circle" style="font-size: 0.8rem; color: #999;"></i>
+                            </span>
+                        </label>
+                        <div style="position: relative;">
+                            <input type="text" 
+                                   id="name" 
+                                   th:field="*{name}" 
+                                   class="form-input" 
+                                   placeholder="Enter member's full name"
+                                   required>
+                            <i class="fas fa-user-tag input-icon"></i>
+                        </div>
+                        <div class="error-message" th:if="${#fields.hasErrors('name')}">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span th:errors="*{name}">Name is required</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-step" style="animation-delay: 0.2s;">
+                    <div class="form-group">
+                        <label for="joinDate" class="form-label">
+                            <i class="fas fa-calendar-alt"></i>
+                            Join Date
+                            <span class="tooltip" data-tooltip="Select the date when the member joined the library">
+                                <i class="fas fa-info-circle" style="font-size: 0.8rem; color: #999;"></i>
+                            </span>
+                        </label>
+                        <div style="position: relative;">
+                            <input type="date" 
+                                   id="joinDate" 
+                                   th:field="*{joinDate}" 
+                                   class="form-input"
+                                   required>
+                            <i class="fas fa-calendar-check input-icon"></i>
+                        </div>
+                        <div class="error-message" th:if="${#fields.hasErrors('joinDate')}">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span th:errors="*{joinDate}">Join date is required</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-step" style="animation-delay: 0.3s;">
+                    <div class="form-group">
+                        <label for="issuedBooks" class="form-label">
+                            <i class="fas fa-books"></i>
+                            Number of Issued Books
+                            <span class="tooltip" data-tooltip="Current number of books issued to this member">
+                                <i class="fas fa-info-circle" style="font-size: 0.8rem; color: #999;"></i>
+                            </span>
+                        </label>
+                        <div style="position: relative;">
+                            <input type="number" 
+                                   id="issuedBooks" 
+                                   th:field="*{issuedBooks}" 
+                                   class="form-input" 
+                                   placeholder="0"
+                                   min="0"
+                                   max="10">
+                            <i class="fas fa-book-reader input-icon"></i>
+                        </div>
+                        <div class="error-message" th:if="${#fields.hasErrors('issuedBooks')}">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span th:errors="*{issuedBooks}">Please enter a valid number</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-step" style="animation-delay: 0.4s;">
+                    <div class="form-group">
+                        <label class="form-label">
+                            Member Status
+							<input type="checkbox" 
+							       id="active" 
+							       th:field="*{active}">
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+
+				<a href="/members" class="btn btn-outline">
+				    <i class="fas fa-arrow-left"></i>
+				    Back to List
+				</a>
+                    
+                    <button type="reset" class="btn btn-secondary">
+                        <i class="fas fa-undo"></i>
+                        Reset Form
+                    </button>
+					
+						<button type="submit" class="btn btn-primary">
+						    <i class="fas fa-save"></i>
+						    <span th:text="${member.id != 0 ? 'Update Member' : 'Add Member'}">Add Member</span>
+						</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced form interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add progressive form step animations
+            const steps = document.querySelectorAll('.form-step');
+            steps.forEach((step, index) => {
+                setTimeout(() => {
+                    step.style.opacity = '1';
+                }, index * 100);
+            });
+
+            // Enhanced input interactions
+            const inputs = document.querySelectorAll('.form-input');
+            inputs.forEach(input => {
+                // Add floating label effect
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('focused');
+                });
+
+                input.addEventListener('blur', function() {
+                    if (!this.value) {
+                        this.parentElement.classList.remove('focused');
+                    }
+                });
+
+                // Auto-fill today's date for join date if empty and it's a new member
+                if (input.type === 'date' && !input.value && window.location.pathname.includes('add')) {
+                    const today = new Date().toISOString().split('T')[0];
+                    input.value = today;
+                }
+            });
+
+            // Form validation with visual feedback
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function(e) {
+                let isValid = true;
+                const requiredInputs = document.querySelectorAll('input[required]');
+                
+                requiredInputs.forEach(input => {
+                    if (!input.value.trim()) {
+                        isValid = false;
+                        input.style.borderColor = '#e74c3c';
+                        input.style.boxShadow = '0 0 0 3px rgba(231, 76, 60, 0.1)';
+                        
+                        // Add shake animation
+                        input.style.animation = 'shake 0.5s ease-in-out';
+                        setTimeout(() => {
+                            input.style.animation = '';
+                        }, 500);
+                    } else {
+                        input.style.borderColor = '#4facfe';
+                        input.style.boxShadow = '0 0 0 3px rgba(79, 172, 254, 0.1)';
+                    }
+                });
+
+                if (!isValid) {
+                    e.preventDefault();
+                    // Show error notification
+                    showNotification('Please fill in all required fields', 'error');
+                }
+            });
+
+            // Enhanced reset button functionality
+            const resetBtn = document.querySelector('button[type="reset"]');
+            resetBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Custom reset with animation
+                inputs.forEach((input, index) => {
+                    setTimeout(() => {
+                        input.value = '';
+                        input.style.borderColor = '#e1e5e9';
+                        input.style.boxShadow = 'none';
+                        input.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            input.style.transform = 'scale(1)';
+                        }, 100);
+                    }, index * 50);
+                });
+
+                // Reset checkbox
+                const checkbox = document.getElementById('active');
+                if (checkbox) {
+                    checkbox.checked = false;
+                }
+
+                showNotification('Form has been reset', 'info');
+            });
+
+            // Add success animation if member was saved
+            if (document.querySelector('.success-message')) {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
+        });
+
+        // Add shake animation for validation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                75% { transform: translateX(5px); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 12px;
+                color: white;
+                font-weight: 600;
+                z-index: 10000;
+                opacity: 0;
+                transform: translateY(-20px);
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                max-width: 300px;
+            `;
+
+            const colors = {
+                success: 'linear-gradient(135deg, #4facfe, #00f2fe)',
+                error: 'linear-gradient(135deg, #ff9a9e, #fecfef)',
+                info: 'linear-gradient(135deg, #667eea, #764ba2)'
+            };
+
+            const icons = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-triangle',
+                info: 'fas fa-info-circle'
+            };
+
+            notification.style.background = colors[type] || colors.info;
+            notification.innerHTML = `
+                <i class="${icons[type] || icons.info}"></i>
+                <span>${message}</span>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Animate in
+            setTimeout(() => {
+                notification.style.opacity = '1';
+                notification.style.transform = 'translateY(0)';
+            }, 100);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateY(-20px)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + S to save
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                document.querySelector('form').submit();
+            }
+            
+            // Escape to go back
+            if (e.key === 'Escape') {
+                window.location.href = '/members';
+            }
+        });
+
+        // Auto-save draft functionality (stores in memory only)
+        let draftData = {};
+        const inputs = document.querySelectorAll('.form-input, .checkbox-input');
+        
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                draftData[this.name || this.id] = this.type === 'checkbox' ? this.checked : this.value;
+            });
+        });
+    </script>
+</body>
+</html>
